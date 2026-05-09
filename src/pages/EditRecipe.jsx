@@ -13,7 +13,7 @@ export default function EditRecipe() {
   const mealFileRef = useRef()
 
   const [recipe, setRecipe] = useState(null)
-  const [imageDataUrl, setImageDataUrl] = useState(null)
+  const [imageDataUrls, setImageDataUrls] = useState([])
   const [mealImageDataUrl, setMealImageDataUrl] = useState(null)
   const [form, setForm] = useState(null)
   const [saving, setSaving] = useState(false)
@@ -34,7 +34,7 @@ export default function EditRecipe() {
     getRecipeById(id).then(r => {
     if (!r) { navigate('/', { replace: true }); return }
     setRecipe(r)
-    setImageDataUrl(r.imageDataUrl)
+    setImageDataUrls(r.imageDataUrls?.length ? r.imageDataUrls : r.imageDataUrl ? [r.imageDataUrl] : [])
     setMealImageDataUrl(r.mealImageDataUrl)
     setForm({
       title: r.title || '',
@@ -98,7 +98,7 @@ export default function EditRecipe() {
         ...form,
         ingredients: form.ingredients.filter(s => s.trim()),
         steps: form.steps.filter(s => s.trim()),
-        imageDataUrl,
+        imageDataUrls,
         mealImageDataUrl,
       })
       navigate(`/recipe/${id}`)
@@ -151,37 +151,38 @@ export default function EditRecipe() {
             onChange={e => loadImage(e.target.files?.[0], setMealImageDataUrl)} />
         </section>
 
-        {/* Recipe screenshot */}
+        {/* Recipe screenshots */}
         <section className={editStyles.photoSection}>
-          <h2 className={editStyles.photoHeading}>📄 Recipe screenshot</h2>
-          <div
-            className={`${editStyles.recipeDrop} ${imageDataUrl ? editStyles.hasImage : ''}`}
-            onClick={() => recipeFileRef.current.click()}
-            onDragOver={e => e.preventDefault()}
-            onDrop={e => {
-              e.preventDefault()
-              loadImage(e.dataTransfer.files?.[0], setImageDataUrl)
-            }}
-          >
-            {imageDataUrl ? (
-              <>
-                <img src={imageDataUrl} alt="Recipe" className={editStyles.recipePreview} />
-                <button
-                  type="button"
-                  className={editStyles.removePhoto}
-                  onClick={e => { e.stopPropagation(); setImageDataUrl(null) }}
-                >✕ Remove</button>
-              </>
-            ) : (
+          <h2 className={editStyles.photoHeading}>📄 Recipe screenshots</h2>
+          {imageDataUrls.length > 0 && (
+            <div className={styles.screenshotGrid}>
+              {imageDataUrls.map((url, i) => (
+                <div key={i} className={styles.screenshotThumb}>
+                  <img src={url} alt={`Screenshot ${i + 1}`} />
+                  <button type="button" className={styles.removeThumb}
+                    onClick={() => setImageDataUrls(prev => prev.filter((_, j) => j !== i))}>✕</button>
+                  <span className={styles.thumbLabel}>Page {i + 1}</span>
+                </div>
+              ))}
+              <button type="button" className={styles.addMoreBtn} onClick={() => recipeFileRef.current.click()}>
+                <span className={styles.addMoreIcon}>＋</span>
+                <span>Add page</span>
+              </button>
+            </div>
+          )}
+          {imageDataUrls.length === 0 && (
+            <div className={editStyles.recipeDrop} onClick={() => recipeFileRef.current.click()}
+              onDragOver={e => e.preventDefault()}
+              onDrop={e => { e.preventDefault(); Array.from(e.dataTransfer.files).forEach(f => loadImage(f, url => setImageDataUrls(p => [...p, url]))) }}>
               <div className={styles.dropPrompt}>
                 <span className={styles.dropIcon}>📷</span>
-                <p>Replace recipe screenshot</p>
-                <p className={styles.dropSub}>Tap, drag, or Ctrl+V to paste</p>
+                <p>Add recipe screenshots</p>
+                <p className={styles.dropSub}>Tap or drag</p>
               </div>
-            )}
-          </div>
-          <input ref={recipeFileRef} type="file" accept="image/*" style={{ display: 'none' }}
-            onChange={e => loadImage(e.target.files?.[0], setImageDataUrl)} />
+            </div>
+          )}
+          <input ref={recipeFileRef} type="file" accept="image/*" multiple style={{ display: 'none' }}
+            onChange={e => { Array.from(e.target.files).forEach(f => loadImage(f, url => setImageDataUrls(p => [...p, url]))); e.target.value = '' }} />
         </section>
 
         <form onSubmit={handleSave} className={styles.form}>

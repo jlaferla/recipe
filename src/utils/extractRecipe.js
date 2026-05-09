@@ -1,4 +1,4 @@
-const BASE_PROMPT = `You are a recipe extraction assistant. When given an image of a recipe, extract all available information and return it as JSON only — no markdown, no explanation.
+const BASE_PROMPT = `You are a recipe extraction assistant. When given one or more images of a recipe (which may span multiple pages or screenshots), extract all available information and return it as JSON only — no markdown, no explanation.
 
 Return this exact structure:
 {
@@ -21,7 +21,8 @@ Rules:
 - Each step as a single complete sentence/instruction
 - If a macro is not present, use empty string
 - category must exactly match one of the allowed values; infer if not stated
-- portions must always be filled — estimate from the quantity of ingredients if not stated (e.g. large amounts of pasta → "4 servings")`
+- portions must always be filled — estimate from the quantity of ingredients if not stated (e.g. large amounts of pasta → "4 servings")
+- If multiple images are provided, treat them as pages of the same recipe and combine all information`
 
 const UNIT_RULES = {
   metric: `
@@ -42,13 +43,23 @@ function buildSystemPrompt(units = 'metric') {
   return BASE_PROMPT + (UNIT_RULES[units] || UNIT_RULES.metric)
 }
 
-export async function extractRecipeFromImage(imageDataUrl, units = 'metric') {
+function imageContent(dataUrl) {
+  const base64 = dataUrl.split(',')[1]
+  const mimeMatch = dataUrl.match(/data:([^;]+);/)
+  const mediaType = mimeMatch ? mimeMatch[1] : 'image/jpeg'
+  return { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } }
+}
+
+// Accepts a single dataUrl string or an array of dataUrls
+export async function extractRecipeFromImage(imageDataUrls, units = 'metric') {
   const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY
   if (!apiKey) throw new Error('VITE_ANTHROPIC_API_KEY is not set in .env')
 
-  const base64 = imageDataUrl.split(',')[1]
-  const mimeMatch = imageDataUrl.match(/data:([^;]+);/)
-  const mediaType = mimeMatch ? mimeMatch[1] : 'image/jpeg'
+  const images = Array.isArray(imageDataUrls) ? imageDataUrls : [imageDataUrls]
+  const imageBlocks = images.map(imageContent)
+  const text = images.length > 1
+    ? `Extract the recipe from these ${images.length} screenshots. They are pages of the same recipe — combine all information into one result.`
+    : 'Extract the recipe from this image.'
 
   const body = {
     model: 'claude-sonnet-4-6',
@@ -57,13 +68,7 @@ export async function extractRecipeFromImage(imageDataUrl, units = 'metric') {
     messages: [
       {
         role: 'user',
-        content: [
-          {
-            type: 'image',
-            source: { type: 'base64', media_type: mediaType, data: base64 },
-          },
-          { type: 'text', text: 'Extract the recipe from this image.' },
-        ],
+        content: [...imageBlocks, { type: 'text', text }],
       },
     ],
   }
@@ -85,12 +90,12 @@ export async function extractRecipeFromImage(imageDataUrl, units = 'metric') {
   }
 
   const data = await res.json()
-  const text = data.content?.[0]?.text || ''
+  const responseText = data.content?.[0]?.text || ''
 
   try {
-    return JSON.parse(text)
+    return JSON.parse(responseText)
   } catch {
-    const match = text.match(/\{[\s\S]*\}/)
+    const match = responseText.match(/\{[\s\S]*\}/)
     if (match) return JSON.parse(match[0])
     throw new Error('Could not parse recipe JSON from response')
   }

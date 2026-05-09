@@ -63,7 +63,8 @@ export default function RecipeDetail() {
 
   if (!recipe) return null
 
-  const { title, category, ingredients, steps, notes, macros, portions, rating, imageDataUrl, mealImageDataUrl, createdAt } = recipe
+  const { title, category, ingredients, steps, notes, macros, portions, rating, imageDataUrl, imageDataUrls, mealImageDataUrl, createdAt } = recipe
+  const screenshots = imageDataUrls?.length ? imageDataUrls : imageDataUrl ? [imageDataUrl] : []
 
   // Serving scaler
   const basePortions = parseInt(formatPortions(portions)) || 1
@@ -83,10 +84,10 @@ export default function RecipeDetail() {
 
   return (
     <div className="page">
-      {/* Hero */}
+      {/* Hero — meal photo only */}
       <div className={styles.hero}>
-        {(mealImageDataUrl || imageDataUrl) ? (
-          <img src={mealImageDataUrl || imageDataUrl} alt={title} className={styles.heroImg} />
+        {mealImageDataUrl ? (
+          <img src={mealImageDataUrl} alt={title} className={styles.heroImg} />
         ) : (
           <div className={styles.heroPlaceholder}>🍴</div>
         )}
@@ -226,10 +227,14 @@ export default function RecipeDetail() {
           </section>
         )}
 
-        {mealImageDataUrl && imageDataUrl && (
+        {screenshots.length > 0 && (
           <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Original Recipe</h2>
-            <img src={imageDataUrl} alt="Original recipe" className={styles.recipeScreenshot} />
+            <h2 className={styles.sectionTitle}>Recipe Screenshot{screenshots.length > 1 ? 's' : ''}</h2>
+            <div className={styles.screenshotRow}>
+              {screenshots.map((src, i) => (
+                <img key={i} src={src} alt={`Screenshot ${i + 1}`} className={styles.recipeScreenshot} />
+              ))}
+            </div>
           </section>
         )}
       </div>

@@ -21,7 +21,7 @@ const EMPTY_FORM = {
 export default function AddRecipe() {
   const navigate = useNavigate()
   const fileRef = useRef()
-  const [imageDataUrl, setImageDataUrl] = useState(null)
+  const [imageDataUrls, setImageDataUrls] = useState([]) // multiple screenshots
   const [extracting, setExtracting] = useState(false)
   const [extractError, setExtractError] = useState(null)
   const [form, setForm] = useState(EMPTY_FORM)
@@ -34,7 +34,9 @@ export default function AddRecipe() {
       const file = item.getAsFile()
       if (!file) return
       const reader = new FileReader()
-      reader.onload = ev => compressImage(ev.target.result).then(setImageDataUrl)
+      reader.onload = ev => compressImage(ev.target.result).then(url =>
+        setImageDataUrls(prev => [...prev, url])
+      )
       reader.readAsDataURL(file)
     }
     window.addEventListener('paste', handlePaste)
@@ -42,20 +44,28 @@ export default function AddRecipe() {
   }, [])
 
   function handleImageChange(e) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = ev => compressImage(ev.target.result).then(setImageDataUrl)
-    reader.readAsDataURL(file)
+    const files = Array.from(e.target.files || [])
+    files.forEach(file => {
+      const reader = new FileReader()
+      reader.onload = ev => compressImage(ev.target.result).then(url =>
+        setImageDataUrls(prev => [...prev, url])
+      )
+      reader.readAsDataURL(file)
+    })
+    e.target.value = '' // reset so same file can be added again if needed
+  }
+
+  function removeImage(index) {
+    setImageDataUrls(prev => prev.filter((_, i) => i !== index))
   }
 
   async function handleExtract() {
-    if (!imageDataUrl) return
+    if (imageDataUrls.length === 0) return
     setExtracting(true)
     setExtractError(null)
     try {
       const { units } = getSettings()
-      const extracted = await extractRecipeFromImage(imageDataUrl, units)
+      const extracted = await extractRecipeFromImage(imageDataUrls, units)
       setForm({
         title: extracted.title || '',
         category: CATEGORIES.includes(extracted.category) ? extracted.category : 'Dinner',
@@ -114,7 +124,7 @@ export default function AddRecipe() {
         ...form,
         ingredients: form.ingredients.filter(s => s.trim()),
         steps: form.steps.filter(s => s.trim()),
-        imageDataUrl,
+        imageDataUrls,
       })
       await saveRecipe(recipe)
       navigate(`/recipe/${recipe.id}`)
@@ -132,61 +142,89 @@ export default function AddRecipe() {
           <h1 className={styles.heading}>Add Recipe</h1>
         </header>
 
-        {/* Photo upload */}
+        {/* Screenshot upload */}
         <section className={styles.section}>
-          <div
-            className={styles.dropZone}
-            onClick={() => fileRef.current.click()}
-            onDragOver={e => e.preventDefault()}
-            onDrop={e => {
-              e.preventDefault()
-              const file = e.dataTransfer.files?.[0]
-              if (file) {
-                const reader = new FileReader()
-                reader.onload = ev => compressImage(ev.target.result).then(setImageDataUrl)
-                reader.readAsDataURL(file)
-              }
-            }}
-          >
-            {imageDataUrl ? (
-              <img src={imageDataUrl} alt="Recipe" className={styles.preview} />
-            ) : (
+          {/* Existing screenshots grid */}
+          {imageDataUrls.length > 0 && (
+            <div className={styles.screenshotGrid}>
+              {imageDataUrls.map((url, i) => (
+                <div key={i} className={styles.screenshotThumb}>
+                  <img src={url} alt={`Screenshot ${i + 1}`} />
+                  <button
+                    type="button"
+                    className={styles.removeThumb}
+                    onClick={() => removeImage(i)}
+                  >✕</button>
+                  <span className={styles.thumbLabel}>Page {i + 1}</span>
+                </div>
+              ))}
+              {/* Add another tile */}
+              <button
+                type="button"
+                className={styles.addMoreBtn}
+                onClick={() => fileRef.current.click()}
+              >
+                <span className={styles.addMoreIcon}>＋</span>
+                <span>Add page</span>
+              </button>
+            </div>
+          )}
+
+          {/* Drop zone (only shown when no images yet) */}
+          {imageDataUrls.length === 0 && (
+            <div
+              className={styles.dropZone}
+              onClick={() => fileRef.current.click()}
+              onDragOver={e => e.preventDefault()}
+              onDrop={e => {
+                e.preventDefault()
+                Array.from(e.dataTransfer.files).forEach(file => {
+                  const reader = new FileReader()
+                  reader.onload = ev => compressImage(ev.target.result).then(url =>
+                    setImageDataUrls(prev => [...prev, url])
+                  )
+                  reader.readAsDataURL(file)
+                })
+              }}
+            >
               <div className={styles.dropPrompt}>
                 <span className={styles.dropIcon}>📷</span>
-                <p>Tap to upload, drag, or paste a recipe photo</p>
-                <p className={styles.dropSub}>JPG, PNG, WEBP · Ctrl+V to paste</p>
+                <p>Tap to upload, drag, or paste a recipe screenshot</p>
+                <p className={styles.dropSub}>Multiple pages? Add them one by one · Ctrl+V to paste</p>
               </div>
-            )}
-          </div>
+            </div>
+          )}
+
           <input
             ref={fileRef}
             type="file"
             accept="image/*"
+            multiple
             style={{ display: 'none' }}
             onChange={handleImageChange}
           />
 
-          {imageDataUrl && (
+          {imageDataUrls.length > 0 && (
             <div className={styles.extractRow}>
               <button
                 className="btn btn-primary"
                 onClick={handleExtract}
                 disabled={extracting}
               >
-                {extracting ? <><span className="spinner" /> Extracting…</> : '✨ Auto-fill from photo'}
+                {extracting
+                  ? <><span className="spinner" /> Extracting…</>
+                  : `✨ Auto-fill from ${imageDataUrls.length > 1 ? `${imageDataUrls.length} screenshots` : 'photo'}`}
               </button>
               <button
                 className="btn btn-ghost"
-                onClick={() => { setImageDataUrl(null); fileRef.current.value = '' }}
+                onClick={() => setImageDataUrls([])}
               >
-                Remove
+                Clear all
               </button>
             </div>
           )}
 
-          {extractError && (
-            <p className={styles.error}>⚠ {extractError}</p>
-          )}
+          {extractError && <p className={styles.error}>⚠ {extractError}</p>}
         </section>
 
         {/* Form */}
@@ -205,22 +243,13 @@ export default function AddRecipe() {
           <div className={styles.row}>
             <div className="form-group" style={{ flex: 1 }}>
               <label className="form-label">Category</label>
-              <select
-                className="form-input"
-                value={form.category}
-                onChange={e => setField('category', e.target.value)}
-              >
+              <select className="form-input" value={form.category} onChange={e => setField('category', e.target.value)}>
                 {CATEGORIES.map(c => <option key={c}>{c}</option>)}
               </select>
             </div>
             <div className="form-group" style={{ flex: 1 }}>
               <label className="form-label">Portions</label>
-              <input
-                className="form-input"
-                value={form.portions}
-                onChange={e => setField('portions', e.target.value)}
-                placeholder="e.g. 4"
-              />
+              <input className="form-input" value={form.portions} onChange={e => setField('portions', e.target.value)} placeholder="e.g. 4" />
             </div>
           </div>
 
@@ -266,23 +295,11 @@ export default function AddRecipe() {
             <label className="form-label">Ingredients</label>
             {form.ingredients.map((ing, i) => (
               <div key={i} className={styles.listRow}>
-                <input
-                  className="form-input"
-                  value={ing}
-                  onChange={e => updateListItem('ingredients', i, e.target.value)}
-                  placeholder={`e.g. 200g spaghetti`}
-                />
-                <button
-                  type="button"
-                  className={styles.removeBtn}
-                  onClick={() => removeListItem('ingredients', i)}
-                  aria-label="Remove"
-                >✕</button>
+                <input className="form-input" value={ing} onChange={e => updateListItem('ingredients', i, e.target.value)} placeholder="e.g. 200g spaghetti" />
+                <button type="button" className={styles.removeBtn} onClick={() => removeListItem('ingredients', i)}>✕</button>
               </div>
             ))}
-            <button type="button" className="btn btn-ghost" style={{ marginTop: '0.4rem' }} onClick={() => addListItem('ingredients')}>
-              + Add ingredient
-            </button>
+            <button type="button" className="btn btn-ghost" style={{ marginTop: '0.4rem' }} onClick={() => addListItem('ingredients')}>+ Add ingredient</button>
           </div>
 
           {/* Steps */}
@@ -291,36 +308,17 @@ export default function AddRecipe() {
             {form.steps.map((step, i) => (
               <div key={i} className={styles.listRow}>
                 <div className={styles.stepNum}>{i + 1}</div>
-                <textarea
-                  className="form-input"
-                  value={step}
-                  onChange={e => updateListItem('steps', i, e.target.value)}
-                  placeholder="Describe this step…"
-                  rows={2}
-                />
-                <button
-                  type="button"
-                  className={styles.removeBtn}
-                  onClick={() => removeListItem('steps', i)}
-                  aria-label="Remove"
-                >✕</button>
+                <textarea className="form-input" value={step} onChange={e => updateListItem('steps', i, e.target.value)} placeholder="Describe this step…" rows={2} />
+                <button type="button" className={styles.removeBtn} onClick={() => removeListItem('steps', i)}>✕</button>
               </div>
             ))}
-            <button type="button" className="btn btn-ghost" style={{ marginTop: '0.4rem' }} onClick={() => addListItem('steps')}>
-              + Add step
-            </button>
+            <button type="button" className="btn btn-ghost" style={{ marginTop: '0.4rem' }} onClick={() => addListItem('steps')}>+ Add step</button>
           </div>
 
           {/* Notes */}
           <div className="form-group">
             <label className="form-label">Notes</label>
-            <textarea
-              className="form-input"
-              value={form.notes}
-              onChange={e => setField('notes', e.target.value)}
-              placeholder="Any tips, substitutions, or serving suggestions…"
-              rows={3}
-            />
+            <textarea className="form-input" value={form.notes} onChange={e => setField('notes', e.target.value)} placeholder="Any tips, substitutions, or serving suggestions…" rows={3} />
           </div>
 
           <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.85rem' }} disabled={saving || !form.title.trim()}>

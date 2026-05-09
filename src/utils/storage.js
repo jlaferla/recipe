@@ -45,7 +45,8 @@ export function createRecipe(fields = {}) {
     macros: { calories: '', protein: '', carbs: '', fat: '' },
     portions: '',
     rating: null,
-    imageDataUrl: null,
+    imageDataUrls: [],   // multiple recipe screenshots
+    imageDataUrl: null,  // legacy single screenshot (kept for backward compat)
     mealImageDataUrl: null,
     ...fields,
   }

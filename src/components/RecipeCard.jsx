@@ -4,15 +4,17 @@ import { formatCalories, formatPortions } from '../utils/format'
 import styles from './RecipeCard.module.css'
 
 export default function RecipeCard({ recipe }) {
-  const { id, title, category, rating, imageDataUrl, mealImageDataUrl, macros, portions } = recipe
+  const { id, title, category, rating, imageDataUrl, imageDataUrls, mealImageDataUrl, macros, portions } = recipe
+  // Hero: meal photo only; fall back to first screenshot for thumbnail
+  const heroImage = mealImageDataUrl || imageDataUrls?.[0] || imageDataUrl || null
   const calories = formatCalories(macros?.calories)
   const portionNum = formatPortions(portions)
 
   return (
     <Link to={`/recipe/${id}`} className={styles.card}>
       <div className={styles.image}>
-        {(mealImageDataUrl || imageDataUrl) ? (
-          <img src={mealImageDataUrl || imageDataUrl} alt={title} />
+        {heroImage ? (
+          <img src={heroImage} alt={title} />
         ) : (
           <div className={styles.placeholder}>🍴</div>
         )}
