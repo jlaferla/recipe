@@ -1,0 +1,64 @@
+.photoSection {
+  margin-bottom: 1.5rem;
+}
+
+.photoHeading {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+  color: var(--text);
+}
+
+.mealDrop, .recipeDrop {
+  position: relative;
+  width: 100%;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--white);
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.15s;
+  min-height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mealDrop:hover, .recipeDrop:hover {
+  border-color: var(--green);
+}
+
+.hasImage {
+  border-style: solid;
+  border-color: var(--border);
+}
+
+.mealPreview {
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+}
+
+.recipePreview {
+  width: 100%;
+  max-height: 220px;
+  object-fit: contain;
+}
+
+.removePhoto {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  border: none;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.removePhoto:hover {
+  background: rgba(192, 57, 43, 0.85);
+}

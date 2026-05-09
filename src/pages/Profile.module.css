@@ -1,0 +1,122 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 0 1.25rem;
+}
+
+.heading {
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.savedBadge {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--green);
+  background: var(--green-light);
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.section {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.section:last-of-type {
+  border-bottom: none;
+}
+
+.sectionTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
+.sectionDesc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 1.1rem;
+  line-height: 1.55;
+}
+
+.options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (max-width: 380px) {
+  .options {
+    grid-template-columns: 1fr;
+  }
+}
+
+.option {
+  position: relative;
+  text-align: left;
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+}
+
+.option:hover {
+  border-color: var(--green);
+}
+
+.active {
+  border-color: var(--green);
+  background: var(--green-light);
+}
+
+.optionTop {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.optionLabel {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.optionDesc {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--green);
+}
+
+.optionDetail {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.checkmark {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--green);
+}
+
+.aboutText {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}

@@ -1,0 +1,191 @@
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 0 1rem;
+}
+
+.heading {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.section {
+  margin-bottom: 1.5rem;
+}
+
+.dropZone {
+  width: 100%;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--white);
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.15s;
+  min-height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dropZone:hover {
+  border-color: var(--green);
+}
+
+.dropPrompt {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-muted);
+}
+
+.dropIcon {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.dropSub {
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  opacity: 0.7;
+}
+
+.preview {
+  width: 100%;
+  max-height: 280px;
+  object-fit: contain;
+}
+
+.extractRow {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.error {
+  color: #c0392b;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  background: #fdf2f2;
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid #f5c6c6;
+}
+
+.form {
+  margin-top: 0.5rem;
+}
+
+.row {
+  display: flex;
+  gap: 1rem;
+}
+
+.ratingRow {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.ratingBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  cursor: pointer;
+  transition: all 0.15s;
+  flex: 1;
+  min-width: 60px;
+}
+
+.ratingBtn:hover {
+  border-color: var(--green);
+  background: var(--green-light);
+}
+
+.ratingActive {
+  border-color: var(--green);
+  background: var(--green);
+  color: white;
+}
+
+.ratingNum {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.ratingLabel {
+  font-size: 0.6rem;
+  text-align: center;
+  line-height: 1.2;
+  margin-top: 0.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.macroGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+@media (min-width: 400px) {
+  .macroGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.macroField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.macroLabel {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.listRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.stepNum {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--green);
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 0.45rem;
+}
+
+.removeBtn {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  padding: 0.45rem 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.removeBtn:hover {
+  background: #fdf2f2;
+  color: #c0392b;
+}
