@@ -12,7 +12,9 @@ export default function Navbar({ session }) {
   return (
     <nav className={styles.nav}>
       <div className={styles.inner}>
-        <Link to="/" className={styles.logo}>🍽 Recipe Book</Link>
+        <Link to="/" className={styles.logo}>
+          <img src="/forkd-logo.svg" alt="Forkd" className={styles.logoImg} />
+        </Link>
         <div className={styles.links}>
           <Link to="/" className={`${styles.link} ${pathname === '/' ? styles.active : ''}`}>
             <span className={styles.icon}>🏠</span>

@@ -48,7 +48,7 @@ export default function Home() {
     <div className="page">
       <div className="container">
         <header className={styles.header}>
-          <h1 className={styles.heading}>My Recipes</h1>
+          <h1 className={styles.heading}>My Forkd Recipes</h1>
           <Link to="/add" className="btn btn-primary">+ Add Recipe</Link>
         </header>
 

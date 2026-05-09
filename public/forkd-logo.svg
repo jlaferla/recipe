@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 240" width="600" height="240">
+  <title>Forkd logo</title>
+  <g transform="translate(300, 140)" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="900" letter-spacing="-0.05em">
+    <text x="-155" y="22" font-size="92" fill="#1a1410" text-anchor="start">Fork</text>
+    <text x="100" y="22" font-size="92" fill="#3d7a4f" text-anchor="start">d</text>
+    <g transform="translate(74, -42) rotate(12) scale(0.55)">
+      <rect x="-3" y="0" width="6" height="34" rx="3" fill="#3d7a4f"/>
+      <rect x="-13" y="-28" width="4" height="30" rx="2" fill="#3d7a4f"/>
+      <rect x="-6" y="-28" width="4" height="30" rx="2" fill="#3d7a4f"/>
+      <rect x="1" y="-28" width="4" height="30" rx="2" fill="#3d7a4f"/>
+      <rect x="8" y="-28" width="4" height="30" rx="2" fill="#3d7a4f"/>
+    </g>
+  </g>
+</svg>

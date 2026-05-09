@@ -4,9 +4,9 @@ import { formatCalories, formatPortions } from '../utils/format'
 import styles from './RecipeCard.module.css'
 
 export default function RecipeCard({ recipe }) {
-  const { id, title, category, rating, imageDataUrl, imageDataUrls, mealImageDataUrl, macros, portions } = recipe
-  // Hero: meal photo only; fall back to first screenshot for thumbnail
-  const heroImage = mealImageDataUrl || imageDataUrls?.[0] || imageDataUrl || null
+  const { id, title, category, rating, mealImageDataUrl, macros, portions } = recipe
+  // Cards only show the meal photo — no screenshot fallback
+  const heroImage = mealImageDataUrl || null
   const calories = formatCalories(macros?.calories)
   const portionNum = formatPortions(portions)
 

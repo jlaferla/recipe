@@ -18,10 +18,14 @@
 }
 
 .logo {
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: var(--green);
-  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+}
+
+.logoImg {
+  height: 28px;
+  width: auto;
+  display: block;
 }
 
 .links {

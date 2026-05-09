@@ -48,8 +48,8 @@ export default function Login() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <div className={styles.logo}>🍽</div>
-        <h1 className={styles.title}>Recipe Book</h1>
+        <img src="/forkd-logo.svg" alt="Forkd" style={{ height: '48px', width: 'auto', margin: '0 auto 0.5rem' }} />
+        <h1 className={styles.title} style={{ display: 'none' }}>Forkd</h1>
         <p className={styles.sub}>{mode === 'login' ? 'Welcome back' : 'Create your account'}</p>
 
         <form onSubmit={handleSubmit} className={styles.form}>
