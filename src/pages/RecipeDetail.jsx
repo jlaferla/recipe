@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { getRecipeById, deleteRecipe, saveRecipe } from '../utils/storage'
 import { compressImage } from '../utils/imageUtils'
 import { RATINGS, RATING_EMOJI } from '../utils/constants'
 import { formatCalories, formatMacroGrams, formatPortions, scaleIngredient } from '../utils/format'
+import { getRecipeStyle } from '../utils/recipeStyle'
 import styles from './RecipeDetail.module.css'
 
 export default function RecipeDetail() {
@@ -13,7 +15,7 @@ export default function RecipeDetail() {
   const [recipe, setRecipe] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [toast, setToast] = useState(null)
-  const [servings, setServings] = useState(null) // null = use original
+  const [servings, setServings] = useState(null)
 
   useEffect(() => {
     getRecipeById(id)
@@ -21,34 +23,52 @@ export default function RecipeDetail() {
       .catch(() => navigate('/', { replace: true }))
   }, [id, navigate])
 
+  // Paste adds a new meal photo
   useEffect(() => {
     function handlePaste(e) {
-      if (recipe?.mealImageDataUrl) return
       const item = Array.from(e.clipboardData?.items || []).find(i => i.type.startsWith('image/'))
       if (!item) return
-      saveMealPhoto(item.getAsFile())
+      addMealPhoto(item.getAsFile())
     }
     window.addEventListener('paste', handlePaste)
     return () => window.removeEventListener('paste', handlePaste)
   }, [recipe])
 
-  function saveMealPhoto(file) {
-    if (!file) return
+  function addMealPhoto(file) {
+    if (!file || !recipe) return
     const reader = new FileReader()
     reader.onload = async ev => {
       const compressed = await compressImage(ev.target.result)
-      const updated = { ...recipe, mealImageDataUrl: compressed }
+      const existing = recipe.mealImageDataUrls?.length
+        ? recipe.mealImageDataUrls
+        : recipe.mealImageDataUrl ? [recipe.mealImageDataUrl] : []
+      const updated = { ...recipe, mealImageDataUrls: [...existing, compressed], mealImageDataUrl: null }
       await saveRecipe(updated)
       setRecipe(updated)
-      showToast('Meal photo saved!')
+      showToast('Photo added!')
     }
     reader.readAsDataURL(file)
   }
 
-  async function removeMealPhoto() {
-    const updated = { ...recipe, mealImageDataUrl: null }
+  async function removeMealPhoto(index) {
+    const existing = recipe.mealImageDataUrls?.length
+      ? recipe.mealImageDataUrls
+      : recipe.mealImageDataUrl ? [recipe.mealImageDataUrl] : []
+    const updated = {
+      ...recipe,
+      mealImageDataUrls: existing.filter((_, i) => i !== index),
+      mealImageDataUrl: null,
+    }
     await saveRecipe(updated)
     setRecipe(updated)
+  }
+
+  async function handleRating(value) {
+    const newRating = recipe.rating === value ? null : value
+    const updated = { ...recipe, rating: newRating }
+    await saveRecipe(updated)
+    setRecipe(updated)
+    if (newRating) showToast(`Rated: ${RATINGS[newRating]}`)
   }
 
   function showToast(msg) {
@@ -63,10 +83,14 @@ export default function RecipeDetail() {
 
   if (!recipe) return null
 
-  const { title, category, ingredients, steps, notes, macros, portions, rating, imageDataUrl, imageDataUrls, mealImageDataUrl, createdAt } = recipe
-  const screenshots = imageDataUrls?.length ? imageDataUrls : imageDataUrl ? [imageDataUrl] : []
+  const { title, category, ingredients, steps, notes, macros, portions, rating, imageDataUrl, imageDataUrls, mealImageDataUrl, mealImageDataUrls, createdAt } = recipe
 
-  // Serving scaler
+  const mealPhotos = mealImageDataUrls?.length
+    ? mealImageDataUrls
+    : mealImageDataUrl ? [mealImageDataUrl] : []
+  const screenshots = imageDataUrls?.length ? imageDataUrls : imageDataUrl ? [imageDataUrl] : []
+  const heroImage = mealPhotos[0] || null
+
   const basePortions = parseInt(formatPortions(portions)) || 1
   const currentServings = servings ?? basePortions
   const multiplier = currentServings / basePortions
@@ -79,17 +103,21 @@ export default function RecipeDetail() {
   const scaledIngredients = (ingredients || []).map(ing =>
     multiplier === 1 ? ing : scaleIngredient(ing, multiplier)
   )
-
   const macroEntries = Object.entries(macros || {}).filter(([, v]) => v)
+  const { gradient, emojis } = getRecipeStyle(recipe)
 
   return (
     <div className="page">
-      {/* Hero — meal photo only */}
+      {/* Hero */}
       <div className={styles.hero}>
-        {mealImageDataUrl ? (
-          <img src={mealImageDataUrl} alt={title} className={styles.heroImg} />
+        {heroImage ? (
+          <img src={heroImage} alt={title} className={styles.heroImg} />
         ) : (
-          <div className={styles.heroPlaceholder}>🍴</div>
+          <div className={styles.heroPlaceholder} style={{ background: gradient }}>
+            <div className={styles.heroEmojis}>
+              {emojis.map((e, i) => <span key={i} className={styles.heroEmoji}>{e}</span>)}
+            </div>
+          </div>
         )}
         <div className={styles.heroOverlay}>
           <div className="container">
@@ -110,39 +138,69 @@ export default function RecipeDetail() {
           <span className={styles.categoryTag}>{category}</span>
           <h1 className={styles.title}>{title}</h1>
           <div className={styles.metaRow}>
-            {rating ? (
-              <span className={styles.ratingBadge}>{RATING_EMOJI[rating]} {RATINGS[rating]}</span>
-            ) : (
-              <Link to={`/recipe/${id}/edit`} className={styles.ratePrompt}>+ Add rating</Link>
-            )}
+            {portions && <span className={styles.metaChip}>Serves {formatPortions(portions)}</span>}
             {createdAt && (
               <span className={styles.metaChip}>
                 {new Date(createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
               </span>
             )}
           </div>
+        </div>
 
-          {/* Meal photo controls */}
-          {!mealImageDataUrl ? (
-            <div className={styles.mealPhotoPrompt}>
-              <button className={styles.mealPhotoBtn} onClick={() => mealPhotoRef.current.click()}>
-                📸 Add a photo of the meal
+        {/* Inline quick rating */}
+        <div className={styles.ratingSection}>
+          <p className={styles.ratingSectionLabel}>{rating ? 'Your rating' : 'Rate this recipe'}</p>
+          <div className={styles.ratingBtns}>
+            {[1, 2, 3, 4, 5].map(n => (
+              <button
+                key={n}
+                className={`${styles.ratingBtn} ${rating === n ? styles.ratingBtnActive : ''}`}
+                onClick={() => handleRating(n)}
+                title={RATINGS[n]}
+              >
+                <span className={styles.ratingEmoji}>{RATING_EMOJI[n]}</span>
+                <span className={styles.ratingBtnLabel}>{RATINGS[n]}</span>
               </button>
-              <span className={styles.mealPhotoPaste}>or Ctrl+V to paste</span>
-              <input ref={mealPhotoRef} type="file" accept="image/*" style={{ display: 'none' }}
-                onChange={e => saveMealPhoto(e.target.files?.[0])} />
+            ))}
+          </div>
+        </div>
+
+        {/* Meal photos section */}
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Photos of this meal</h2>
+            <button className={styles.addPhotoBtn} onClick={() => mealPhotoRef.current.click()}>
+              + Add photo
+            </button>
+            <input ref={mealPhotoRef} type="file" accept="image/*" style={{ display: 'none' }}
+              onChange={e => addMealPhoto(e.target.files?.[0])} />
+          </div>
+          {mealPhotos.length === 0 ? (
+            <div
+              className={styles.mealPhotoEmpty}
+              onClick={() => mealPhotoRef.current.click()}
+            >
+              <span>📸</span>
+              <p>Tap to add a photo of this meal · or Ctrl+V to paste</p>
             </div>
           ) : (
-            <div className={styles.mealPhotoControls}>
-              <button className={styles.changeMealBtn} onClick={() => mealPhotoRef.current.click()}>
-                📸 Change meal photo
+            <div className={styles.mealPhotoGrid}>
+              {mealPhotos.map((src, i) => (
+                <div key={i} className={styles.mealPhotoThumb}>
+                  <img src={src} alt={`Meal photo ${i + 1}`} />
+                  <button
+                    className={styles.mealPhotoRemove}
+                    onClick={() => removeMealPhoto(i)}
+                  >✕</button>
+                </div>
+              ))}
+              <button className={styles.addPhotoTile} onClick={() => mealPhotoRef.current.click()}>
+                <span>＋</span>
+                <span>Add</span>
               </button>
-              <button className={styles.removeMealBtn} onClick={removeMealPhoto}>Remove</button>
-              <input ref={mealPhotoRef} type="file" accept="image/*" style={{ display: 'none' }}
-                onChange={e => saveMealPhoto(e.target.files?.[0])} />
             </div>
           )}
-        </div>
+        </section>
 
         {/* Serving scaler */}
         {basePortions > 0 && (
@@ -161,9 +219,7 @@ export default function RecipeDetail() {
               )}
             </div>
             {multiplier !== 1 && (
-              <p className={styles.scalerNote}>
-                Ingredients scaled {multiplier > 1 ? 'up' : 'down'} ×{Math.round(multiplier * 100) / 100}
-              </p>
+              <p className={styles.scalerNote}>Ingredients scaled {multiplier > 1 ? 'up' : 'down'} ×{Math.round(multiplier * 100) / 100}</p>
             )}
           </section>
         )}
@@ -179,9 +235,7 @@ export default function RecipeDetail() {
                 return (
                   <div key={key} className={styles.macroCard}>
                     <span className={styles.macroValue}>{display}{unit}</span>
-                    <span className={styles.macroKey}>
-                      {key.charAt(0).toUpperCase() + key.slice(1)}
-                    </span>
+                    <span className={styles.macroKey}>{key.charAt(0).toUpperCase() + key.slice(1)}</span>
                   </div>
                 )
               })}
@@ -196,8 +250,7 @@ export default function RecipeDetail() {
             <ul className={styles.ingredientList}>
               {scaledIngredients.map((ing, i) => (
                 <li key={i} className={styles.ingredient}>
-                  <span className={styles.bullet}>•</span>
-                  {ing}
+                  <span className={styles.bullet}>•</span>{ing}
                 </li>
               ))}
             </ul>
@@ -227,6 +280,7 @@ export default function RecipeDetail() {
           </section>
         )}
 
+        {/* Screenshots */}
         {screenshots.length > 0 && (
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>Recipe Screenshot{screenshots.length > 1 ? 's' : ''}</h2>

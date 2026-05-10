@@ -46,9 +46,10 @@ export function createRecipe(fields = {}) {
     portions: '',
     rating: null,
     tags: [],            // extra auto-detected tags e.g. ['Sauces']
-    imageDataUrls: [],   // multiple recipe screenshots
-    imageDataUrl: null,  // legacy single screenshot (kept for backward compat)
-    mealImageDataUrl: null,
+    imageDataUrls: [],      // multiple recipe screenshots
+    imageDataUrl: null,     // legacy single screenshot (backward compat)
+    mealImageDataUrls: [],  // multiple meal photos
+    mealImageDataUrl: null, // legacy single meal photo (backward compat)
     ...fields,
   }
 }

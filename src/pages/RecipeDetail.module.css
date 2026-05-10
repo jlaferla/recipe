@@ -24,7 +24,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 4rem;
+}
+
+.heroEmojis {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.heroEmoji {
+  font-size: 3.5rem;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
 }
 
 .heroOverlay {
@@ -109,77 +119,6 @@
   background: var(--green-light);
 }
 
-.mealPhotoPrompt {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-top: 0.85rem;
-  flex-wrap: wrap;
-}
-
-.mealPhotoBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--green);
-  background: var(--green-light);
-  border: 1.5px dashed var(--green);
-  border-radius: 999px;
-  padding: 0.4rem 1rem;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s;
-}
-
-.mealPhotoBtn:hover {
-  background: #d4eadb;
-}
-
-.mealPhotoPaste {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-}
-
-.mealPhotoControls {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  margin-top: 0.85rem;
-  flex-wrap: wrap;
-}
-
-.changeMealBtn {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--green);
-  background: var(--green-light);
-  border: 1px solid var(--green);
-  border-radius: 999px;
-  padding: 0.35rem 0.9rem;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s;
-}
-
-.changeMealBtn:hover {
-  background: #d4eadb;
-}
-
-.removeMealBtn {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  text-decoration: underline;
-}
-
-.removeMealBtn:hover {
-  color: #c0392b;
-}
 
 .screenshotRow {
   display: flex;
@@ -195,6 +134,172 @@
   object-fit: contain;
   background: var(--cream-dark);
 }
+
+/* Quick rating */
+.ratingSection {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.9rem 1rem 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.ratingSectionLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 0.65rem;
+}
+
+.ratingBtns {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.ratingBtn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.25rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.ratingBtn:hover {
+  border-color: var(--green);
+  background: var(--green-light);
+}
+
+.ratingBtnActive {
+  border-color: var(--green);
+  background: var(--green);
+}
+
+.ratingEmoji {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.ratingBtnLabel {
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.ratingBtnActive .ratingBtnLabel {
+  color: rgba(255,255,255,0.85);
+}
+
+/* Meal photo gallery */
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.addPhotoBtn {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--green);
+  background: none;
+  border: 1.5px solid var(--green);
+  border-radius: 999px;
+  padding: 0.3rem 0.85rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.addPhotoBtn:hover { background: var(--green-light); }
+
+.mealPhotoEmpty {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  transition: border-color 0.15s;
+}
+
+.mealPhotoEmpty:hover { border-color: var(--green); }
+
+.mealPhotoEmpty span { font-size: 1.75rem; }
+
+.mealPhotoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.6rem;
+}
+
+.mealPhotoThumb {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--cream-dark);
+}
+
+.mealPhotoThumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mealPhotoRemove {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.3rem;
+  background: rgba(0,0,0,0.55);
+  color: white;
+  border: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 0.65rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+}
+
+.addPhotoTile {
+  aspect-ratio: 1;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.addPhotoTile span:first-child { font-size: 1.4rem; }
+.addPhotoTile:hover { border-color: var(--green); color: var(--green); }
 
 .titleBlock {
   padding: 1.25rem 0 0.75rem;
