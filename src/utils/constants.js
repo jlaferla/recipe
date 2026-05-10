@@ -3,7 +3,7 @@ export const CATEGORIES = [
   'Lunch',
   'Dinner',
   'Snacks',
-  'Sauces & Condiments',
+  'Sauces',
 ]
 
 export const RATINGS = {
@@ -36,3 +36,12 @@ export const RATING_EMOJI = {
   4: '🥂',
   5: '⭐',
 }
+
+export const SORT_OPTIONS = [
+  { value: 'newest', label: 'Recently added' },
+  { value: 'rating', label: 'Rating' },
+  { value: 'calories_asc', label: 'Calories (low → high)' },
+  { value: 'calories_desc', label: 'Calories (high → low)' },
+  { value: 'serves_asc', label: 'Serves (low → high)' },
+  { value: 'az', label: 'A → Z' },
+]

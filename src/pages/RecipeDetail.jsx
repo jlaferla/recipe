@@ -94,7 +94,7 @@ export default function RecipeDetail() {
         <div className={styles.heroOverlay}>
           <div className="container">
             <div className={styles.heroTop}>
-              <button className={styles.backBtn} onClick={() => navigate(-1)}>← Back</button>
+              <Link to="/" className={styles.backBtn}>← Recipes</Link>
               <div className={styles.heroActions}>
                 <Link to={`/recipe/${id}/edit`} className={styles.editBtn}>✏️ Edit</Link>
                 <button className={styles.deleteBtn} onClick={() => setConfirmDelete(true)}>🗑</button>

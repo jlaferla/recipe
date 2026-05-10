@@ -114,7 +114,6 @@ export default function EditRecipe() {
     <div className="page">
       <div className="container">
         <header className={styles.header}>
-          <button className="btn btn-ghost" onClick={() => navigate(-1)}>← Back</button>
           <h1 className={styles.heading}>Edit Recipe</h1>
         </header>
 

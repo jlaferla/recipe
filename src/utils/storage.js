@@ -45,6 +45,7 @@ export function createRecipe(fields = {}) {
     macros: { calories: '', protein: '', carbs: '', fat: '' },
     portions: '',
     rating: null,
+    tags: [],            // extra auto-detected tags e.g. ['Sauces']
     imageDataUrls: [],   // multiple recipe screenshots
     imageDataUrl: null,  // legacy single screenshot (kept for backward compat)
     mealImageDataUrl: null,

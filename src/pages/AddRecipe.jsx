@@ -73,6 +73,7 @@ export default function AddRecipe() {
         steps: extracted.steps?.length ? extracted.steps : [''],
         notes: extracted.notes || '',
         portions: extracted.portions || '',
+        tags: extracted.tags || [],
         rating: null,
         macros: {
           calories: extracted.macros?.calories || '',
@@ -138,7 +139,6 @@ export default function AddRecipe() {
     <div className="page">
       <div className="container">
         <header className={styles.header}>
-          <button className="btn btn-ghost" onClick={() => navigate(-1)}>← Back</button>
           <h1 className={styles.heading}>Add Recipe</h1>
         </header>
 

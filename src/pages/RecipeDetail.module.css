@@ -53,6 +53,9 @@
   font-weight: 600;
   cursor: pointer;
   backdrop-filter: blur(4px);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
 }
 
 .heroActions {

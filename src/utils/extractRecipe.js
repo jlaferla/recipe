@@ -3,7 +3,8 @@ const BASE_PROMPT = `You are a recipe extraction assistant. When given one or mo
 Return this exact structure:
 {
   "title": "string",
-  "category": "one of: Breakfast | Lunch | Dinner | Snacks | Sauces & Condiments",
+  "category": "one of: Breakfast | Lunch | Dinner | Snacks | Sauces",
+  "tags": ["array of extra tags — include 'Sauces' if the recipe contains a notable homemade sauce, dressing, or marinade as a component, even if the main dish is Dinner/Lunch etc. Otherwise empty array."],
   "ingredients": ["string", ...],
   "steps": ["string", ...],
   "notes": "string or empty string",
