@@ -5,7 +5,6 @@ import { getRecipeById, deleteRecipe, saveRecipe } from '../utils/storage'
 import { compressImage } from '../utils/imageUtils'
 import { RATINGS, RATING_EMOJI } from '../utils/constants'
 import { formatCalories, formatMacroGrams, formatPortions, scaleIngredient } from '../utils/format'
-import { getRecipeStyle } from '../utils/recipeStyle'
 import styles from './RecipeDetail.module.css'
 
 export default function RecipeDetail() {
@@ -104,37 +103,20 @@ export default function RecipeDetail() {
     multiplier === 1 ? ing : scaleIngredient(ing, multiplier)
   )
   const macroEntries = Object.entries(macros || {}).filter(([, v]) => v)
-  const { gradient, emojis } = getRecipeStyle(recipe)
+  // gradient/emojis no longer needed (hero removed)
 
   return (
     <div className="page">
-      {/* Hero */}
-      <div className={styles.hero}>
-        {heroImage ? (
-          <img src={heroImage} alt={title} className={styles.heroImg} />
-        ) : (
-          <div className={styles.heroPlaceholder} style={{ background: gradient }}>
-            <div className={styles.heroEmojis}>
-              {emojis.map((e, i) => <span key={i} className={styles.heroEmoji}>{e}</span>)}
-            </div>
-          </div>
-        )}
-        <div className={styles.heroOverlay}>
-          <div className="container">
-            <div className={styles.heroTop}>
-              <Link to="/" className={styles.backBtn}>← Recipes</Link>
-              <div className={styles.heroActions}>
-                <Link to={`/recipe/${id}/edit`} className={styles.editBtn}>✏️ Edit</Link>
-                <button className={styles.deleteBtn} onClick={() => setConfirmDelete(true)}>🗑</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className="container">
         {/* Title block */}
         <div className={styles.titleBlock}>
+          <div className={styles.titleRow}>
+            <Link to="/" className={styles.backBtn}>← Recipes</Link>
+            <div className={styles.titleActions}>
+              <Link to={`/recipe/${id}/edit`} className={styles.editBtn}>✏️ Edit</Link>
+              <button className={styles.deleteBtn} onClick={() => setConfirmDelete(true)}>🗑</button>
+            </div>
+          </div>
           <span className={styles.categoryTag}>{category}</span>
           <h1 className={styles.title}>{title}</h1>
           <div className={styles.metaRow}>
