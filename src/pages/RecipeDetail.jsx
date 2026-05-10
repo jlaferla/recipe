@@ -5,6 +5,7 @@ import { getRecipeById, deleteRecipe, saveRecipe } from '../utils/storage'
 import { compressImage } from '../utils/imageUtils'
 import { RATINGS, RATING_EMOJI } from '../utils/constants'
 import { formatCalories, formatMacroGrams, formatPortions, scaleIngredient } from '../utils/format'
+import ImageCarousel from '../components/ImageCarousel'
 import styles from './RecipeDetail.module.css'
 
 export default function RecipeDetail() {
@@ -15,6 +16,7 @@ export default function RecipeDetail() {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [toast, setToast] = useState(null)
   const [servings, setServings] = useState(null)
+  const [lightboxIndex, setLightboxIndex] = useState(null)
 
   useEffect(() => {
     getRecipeById(id)
@@ -169,11 +171,8 @@ export default function RecipeDetail() {
             <div className={styles.mealPhotoGrid}>
               {mealPhotos.map((src, i) => (
                 <div key={i} className={styles.mealPhotoThumb}>
-                  <img src={src} alt={`Meal photo ${i + 1}`} />
-                  <button
-                    className={styles.mealPhotoRemove}
-                    onClick={() => removeMealPhoto(i)}
-                  >✕</button>
+                  <img src={src} alt={`Meal photo ${i + 1}`} onClick={() => setLightboxIndex(i)} style={{ cursor: 'zoom-in' }} />
+                  <button className={styles.mealPhotoRemove} onClick={e => { e.stopPropagation(); removeMealPhoto(i) }}>✕</button>
                 </div>
               ))}
               <button className={styles.addPhotoTile} onClick={() => mealPhotoRef.current.click()}>
@@ -262,20 +261,33 @@ export default function RecipeDetail() {
           </section>
         )}
 
-        {/* Screenshots */}
+        {/* Screenshots carousel */}
         {screenshots.length > 0 && (
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>Recipe Screenshot{screenshots.length > 1 ? 's' : ''}</h2>
-            <div className={styles.screenshotRow}>
-              {screenshots.map((src, i) => (
-                <img key={i} src={src} alt={`Screenshot ${i + 1}`} className={styles.recipeScreenshot} />
-              ))}
-            </div>
+            <ImageCarousel images={screenshots} altPrefix="Screenshot" />
           </section>
         )}
       </div>
 
       {toast && <div className="toast">{toast}</div>}
+
+      {lightboxIndex !== null && (
+        <div className={styles.lightbox} onClick={() => setLightboxIndex(null)}>
+          <button className={styles.lightboxClose} onClick={() => setLightboxIndex(null)}>✕</button>
+          {mealPhotos.length > 1 && (
+            <button className={`${styles.lightboxArrow} ${styles.lightboxLeft}`}
+              onClick={e => { e.stopPropagation(); setLightboxIndex(i => (i - 1 + mealPhotos.length) % mealPhotos.length) }}>‹</button>
+          )}
+          <img src={mealPhotos[lightboxIndex]} alt="Meal photo" className={styles.lightboxImg} onClick={e => e.stopPropagation()} />
+          {mealPhotos.length > 1 && (
+            <button className={`${styles.lightboxArrow} ${styles.lightboxRight}`}
+              onClick={e => { e.stopPropagation(); setLightboxIndex(i => (i + 1) % mealPhotos.length) }}>›</button>
+          )}
+          {mealPhotos.length > 1 && <p className={styles.lightboxCount}>{lightboxIndex + 1} / {mealPhotos.length}</p>}
+        </div>
+      )}
+
 
       {confirmDelete && (
         <div className={styles.modalBackdrop} onClick={() => setConfirmDelete(false)}>
